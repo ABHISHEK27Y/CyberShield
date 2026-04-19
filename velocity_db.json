@@ -1,0 +1,49 @@
+{
+  "phones": {
+    "9876543210": {
+      "count": 2,
+      "complaint_ids": [
+        "3D9C7CDA",
+        "3889F0C0"
+      ],
+      "first_seen": "2026-04-19T23:01:12.293747",
+      "last_seen": "2026-04-19T23:13:12.825739"
+    },
+    "9988776655": {
+      "count": 1,
+      "complaint_ids": [
+        "3E8234D2"
+      ],
+      "first_seen": "2026-04-19T23:14:44.437216",
+      "last_seen": "2026-04-19T23:14:44.437216"
+    },
+    "9876541230": {
+      "count": 1,
+      "complaint_ids": [
+        "7BA481CD"
+      ],
+      "first_seen": "2026-04-19T23:15:50.597190",
+      "last_seen": "2026-04-19T23:15:50.597190"
+    },
+    "9876548888": {
+      "count": 1,
+      "complaint_ids": [
+        "1AEDADB8"
+      ],
+      "first_seen": "2026-04-19T23:16:01.400280",
+      "last_seen": "2026-04-19T23:16:01.400280"
+    }
+  },
+  "urls": {
+    "http://sbi-kyc-update.net/verify": {
+      "count": 2,
+      "complaint_ids": [
+        "3D9C7CDA",
+        "3889F0C0"
+      ],
+      "first_seen": "2026-04-19T23:01:12.293747",
+      "last_seen": "2026-04-19T23:13:12.825739",
+      "original": "http://sbi-kyc-update.net/verify"
+    }
+  }
+}

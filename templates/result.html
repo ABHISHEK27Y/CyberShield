@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analysis Result — NCRP Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0A1628; --gold: #C8960C; --saffron: #E8650A;
+      --light: #F5F6FA; --mgray: #CBD0DC; --text: #1a2440;
+      --red: #C0392B; --green: #1A7A35; --amber: #D97706;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--light); color: var(--text); }
+
+    nav {
+      background: var(--navy); padding: 0 32px;
+      display: flex; align-items: center; height: 60px; gap: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .nav-title { color: #fff; font-size: 1rem; font-weight: 700; flex: 1; }
+    .nav-sub { color: rgba(255,255,255,0.45); font-size: 0.75rem; display: block; font-weight: 400; }
+    .nav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .nav-link {
+      color: rgba(255,255,255,0.6); font-size: 0.8rem; text-decoration: none;
+      padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+    }
+    .helpline { background: var(--navy); color: rgba(255,255,255,0.7); text-align: center;
+      padding: 9px; font-size: 0.78rem; }
+    .helpline b { color: var(--gold); }
+
+    /* ─── RISK HERO ─── */
+    .risk-hero {
+      padding: 40px 32px; display: flex; align-items: center;
+      justify-content: center; gap: 28px; flex-wrap: wrap;
+      position: relative; overflow: hidden;
+    }
+    .risk-hero::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.06;
+      background: repeating-linear-gradient(45deg,#fff 0,#fff 1px,transparent 1px,transparent 12px);
+    }
+    .rh-FRAUD      { background: linear-gradient(135deg,#7B0000,#C0392B); }
+    .rh-SUSPICIOUS { background: linear-gradient(135deg,#7A2500,#D44D1C); }
+    .rh-UNCERTAIN  { background: linear-gradient(135deg,#5A3A00,#C8960C); }
+    .rh-LEGIT      { background: linear-gradient(135deg,#083A15,#1A7A35); }
+
+    .rh-icon { font-size: 4rem; line-height: 1; }
+    .rh-text h2 {
+      font-family: 'DM Serif Display', serif; color: #fff;
+      font-size: 2.4rem; line-height: 1;
+    }
+    .rh-text p { color: rgba(255,255,255,0.8); font-size: 0.92rem; margin-top: 6px; max-width: 340px; line-height: 1.5; }
+    .rh-meter {
+      background: rgba(255,255,255,0.15); border-radius: 16px;
+      padding: 20px 24px; text-align: center; min-width: 140px;
+    }
+    .rh-meter .pct { font-family: 'DM Serif Display', serif; font-size: 3rem; color: #fff; line-height: 1; }
+    .rh-meter .lbl { color: rgba(255,255,255,0.7); font-size: 0.75rem; margin-top: 4px; }
+    .ref-pill {
+      background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+      font-size: 0.75rem; padding: 4px 12px; border-radius: 20px;
+      display: inline-block; margin-top: 8px;
+    }
+
+    /* ─── LAYOUT ─── */
+    main { max-width: 880px; margin: 0 auto; padding: 28px 20px 60px; display: flex; flex-direction: column; gap: 18px; }
+
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 3px 20px rgba(0,0,0,0.07); overflow: hidden; }
+    .card-head {
+      background: var(--navy); color: #fff; padding: 11px 20px;
+      font-size: 0.82rem; font-weight: 700; letter-spacing: 0.4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-head .badge {
+      margin-left: auto; background: rgba(255,255,255,0.15);
+      font-size: 0.72rem; padding: 3px 9px; border-radius: 20px; font-weight: 500;
+    }
+    .card-body { padding: 20px; }
+
+    /* ─── WORD HEATMAP ─── */
+    .heatmap-legend {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      margin-bottom: 14px; align-items: center;
+    }
+    .hl-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #556; }
+    .hl-swatch {
+      width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    .heatmap-text {
+      background: #FAFBFF; border: 1px solid var(--mgray);
+      border-radius: 10px; padding: 18px; line-height: 2.2;
+      font-size: 0.95rem; word-break: break-word;
+    }
+
+    /* Token spans */
+    .tok { border-radius: 4px; padding: 1px 4px; transition: transform 0.1s; cursor: default; }
+    .tok:hover { transform: scale(1.08); }
+
+    .tok-high {
+      background: rgba(192,57,43,0.18); color: #7A0000;
+      border-bottom: 2px solid #C0392B; font-weight: 600;
+    }
+    .tok-medium {
+      background: rgba(217,119,6,0.15); color: #7A3A00;
+      border-bottom: 2px solid #D97706;
+    }
+    .tok-low {
+      background: rgba(200,150,12,0.12); color: #5A4000;
+      border-bottom: 2px solid #C8960C;
+    }
+    .tok-safe { color: #334; }
+
+    .tok-tooltip {
+      display: none; position: absolute; bottom: 100%; left: 50%;
+      transform: translateX(-50%); background: #1a2440;
+      color: #fff; font-size: 0.72rem; padding: 4px 8px;
+      border-radius: 5px; white-space: nowrap; margin-bottom: 4px;
+      pointer-events: none; z-index: 99;
+    }
+    .tok-wrap { position: relative; display: inline-block; }
+    .tok-wrap:hover .tok-tooltip { display: block; }
+
+    .heatmap-note {
+      margin-top: 10px; font-size: 0.78rem; color: #778;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ─── VELOCITY TRACKER ─── */
+    .velocity-banner {
+      border-radius: 10px; padding: 14px 18px; margin-bottom: 0;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .vb-CRITICAL { background: #FFF0EE; border: 1.5px solid var(--red); }
+    .vb-HIGH     { background: #FFF4EE; border: 1.5px solid var(--saffron); }
+    .vb-MEDIUM   { background: #FFFBEE; border: 1.5px solid var(--gold); }
+    .vb-LOW      { background: #F0FFF4; border: 1.5px solid var(--green); }
+
+    .vb-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .vb-body h4 { font-size: 0.92rem; font-weight: 700; margin-bottom: 4px; }
+    .vb-body p  { font-size: 0.82rem; color: #556; line-height: 1.5; }
+
+    .velocity-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    .velocity-table th {
+      background: var(--light); text-align: left; padding: 8px 14px;
+      font-size: 0.72rem; color: #667; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.4px;
+      border-bottom: 1px solid var(--mgray);
+    }
+    .velocity-table td {
+      padding: 10px 14px; font-size: 0.83rem;
+      border-bottom: 1px solid #F0F2F8; vertical-align: middle;
+    }
+    .velocity-table tr:last-child td { border-bottom: none; }
+
+    .threat-pill {
+      display: inline-block; font-size: 0.72rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .tp-CRITICAL { background: #FDECEA; color: var(--red); }
+    .tp-HIGH     { background: #FFF0E8; color: var(--saffron); }
+    .tp-MEDIUM   { background: #FFF8E0; color: var(--gold); }
+    .tp-LOW      { background: #EAF7EE; color: var(--green); }
+
+    .report-count {
+      font-family: 'DM Serif Display', serif; font-size: 1.4rem;
+      font-weight: 700; color: var(--navy);
+    }
+
+    /* ─── OTHER CARDS ─── */
+    .ft-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .ft-name { font-family: 'DM Serif Display', serif; font-size: 1.2rem; color: var(--navy); }
+    .ncrp-pill { background: var(--saffron); color: #fff; font-size: 0.75rem; padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+    .uncertain-pill { background: var(--gold); color: #fff; font-size: 0.75rem; padding: 4px 11px; border-radius: 20px; font-weight: 600; }
+    .review-note { background: #FFF8E8; border: 1px solid var(--gold); border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; color: #6A4400; margin-top: 10px; line-height: 1.5; }
+
+    .bar-wrap { margin-bottom: 14px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #556; margin-bottom: 5px; font-weight: 500; }
+    .bar-outer { height: 10px; background: #E0E5EF; border-radius: 5px; overflow: hidden; }
+    .bar-inner { height: 100%; border-radius: 5px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+    .bi-fraud { background: linear-gradient(90deg,#C0392B,#E74C3C); }
+    .bi-legit { background: linear-gradient(90deg,#1A7A35,#27AE60); }
+    .model-note { font-size: 0.75rem; color: #778; margin-top: 10px; }
+
+    .eg { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 12px; }
+    .ei { background: var(--light); border-radius: 10px; padding: 13px 15px; }
+    .ei-label { font-size: 0.72rem; font-weight: 700; color: #667; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+    .ei-tag { display: inline-block; background: var(--navy); color: #fff; font-size: 0.77rem; padding: 3px 9px; border-radius: 5px; margin: 2px; }
+    .ei-none { color: #AAB; font-style: italic; font-size: 0.83rem; }
+
+    .kw-pill { display: inline-block; background: #FFF0E8; border: 1px solid rgba(232,101,10,0.3); color: #7A2500; padding: 5px 13px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; margin: 3px; }
+
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn-pdf { display: inline-flex; align-items: center; gap: 9px; background: linear-gradient(135deg,var(--saffron),#B03010); color: #fff; text-decoration: none; padding: 13px 24px; border-radius: 10px; font-size: 0.92rem; font-weight: 700; box-shadow: 0 4px 16px rgba(232,101,10,0.3); transition: opacity 0.2s; }
+    .btn-pdf:hover { opacity: 0.9; }
+    .btn-ncrp { display: inline-flex; align-items: center; gap: 9px; background: #fff; color: var(--navy); text-decoration: none; padding: 12px 22px; border-radius: 10px; font-size: 0.92rem; font-weight: 700; border: 2px solid var(--navy); transition: background 0.2s; }
+    .btn-ncrp:hover { background: var(--light); }
+    .btn-back { color: #778; text-decoration: none; font-size: 0.85rem; padding: 12px 18px; border-radius: 10px; border: 1.5px solid #DDE0EC; }
+    .action-note { font-size: 0.78rem; color: #889; margin-top: 8px; }
+
+    footer { text-align: center; font-size: 0.75rem; color: #AAB; padding: 0 0 32px; }
+
+    @media (max-width: 600px) {
+      .risk-hero { flex-direction: column; align-items: flex-start; padding: 30px 20px; }
+      .rh-meter { align-self: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span style="font-size:22px">🛡️</span>
+  <div>
+    <span class="nav-title">NCRP Fraud Detection Portal</span>
+    <span class="nav-sub">Ministry of Home Affairs, Government of India</span>
+  </div>
+  <div class="nav-right">
+    {% if user and user.is_authenticated %}
+      {% if user.is_admin %}<a class="nav-link" href="/admin">⚙ Admin</a>{% endif %}
+      <a class="nav-link" href="/logout">Sign Out</a>
+    {% else %}
+      <a class="nav-link" href="/login">Sign In</a>
+    {% endif %}
+  </div>
+</nav>
+<div class="helpline">National Cybercrime Helpline: <b>1930</b> &nbsp;·&nbsp; cybercrime.gov.in</div>
+
+{% set icons = {"FRAUD":"🚨","SUSPICIOUS":"⚠️","UNCERTAIN":"🔎","LEGIT":"✅"} %}
+{% set descs = {
+  "FRAUD":      "High confidence — strong fraud indicators detected.",
+  "SUSPICIOUS": "Moderate risk — notable fraud patterns found. Exercise caution.",
+  "UNCERTAIN":  "Could not classify confidently. Flagged for admin review.",
+  "LEGIT":      "No significant fraud indicators found in this message."
+} %}
+
+<div class="risk-hero rh-{{ result.risk_level }}">
+  <div class="rh-icon">{{ icons[result.risk_level] }}</div>
+  <div class="rh-text">
+    <h2>{{ result.risk_level }}</h2>
+    <p>{{ descs[result.risk_level] }}</p>
+    <span class="ref-pill">Ref: {{ complaint_id }} · {{ timestamp }}</span>
+  </div>
+  <div class="rh-meter">
+    <div class="pct">{{ "%.1f"|format(result.fraud_probability * 100) }}%</div>
+    <div class="lbl">FRAUD PROBABILITY</div>
+  </div>
+</div>
+
+<main>
+
+  {# ══════════════════════════════════════════ #}
+  {# NOVEL FEATURE 1 — VELOCITY TRACKER        #}
+  {# ══════════════════════════════════════════ #}
+  {% if velocity_alerts %}
+  <div class="card">
+    <div class="card-head">
+      🔁 REPEAT OFFENDER INTELLIGENCE — Velocity Tracker
+      <span class="badge">{{ velocity_alerts | length }} indicator(s) flagged</span>
+    </div>
+    <div class="card-body">
+
+      {# Highest threat level banner #}
+      {% set top = velocity_alerts[0] %}
+      <div class="velocity-banner vb-{{ top.threat_level }}">
+        {% if top.threat_level == "CRITICAL" %}
+          <span class="vb-icon">🚨</span>
+          <div class="vb-body">
+            <h4 style="color:var(--red)">CRITICAL — Known Fraud Infrastructure</h4>
+            <p>This phone number or URL has been reported <b>{{ top.count }} times</b> across multiple complaints. This is a confirmed repeat offender in our threat database.</p>
+          </div>
+        {% elif top.threat_level == "HIGH" %}
+          <span class="vb-icon">⚠️</span>
+          <div class="vb-body">
+            <h4 style="color:var(--saffron)">HIGH — Repeat Offender Detected</h4>
+            <p>This indicator has appeared in <b>{{ top.count }} previous complaints</b>. Strong evidence of systematic fraud operation.</p>
+          </div>
+        {% elif top.threat_level == "MEDIUM" %}
+          <span class="vb-icon">🔶</span>
+          <div class="vb-body">
+            <h4 style="color:var(--gold)">MEDIUM — Seen Before</h4>
+            <p>This indicator was reported in <b>{{ top.count }} earlier complaint(s)</b>. Exercise caution.</p>
+          </div>
+        {% else %}
+          <span class="vb-icon">📌</span>
+          <div class="vb-body">
+            <h4 style="color:var(--green)">First Report Recorded</h4>
+            <p>This indicator has been added to the threat database for future cross-complaint matching.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <table class="velocity-table" style="margin-top:14px;">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Indicator</th>
+            <th>Reports</th>
+            <th>Threat Level</th>
+            <th>First Seen</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in velocity_alerts %}
+          <tr>
+            <td style="font-weight:600;font-size:0.8rem;">{{ a.type }}</td>
+            <td style="font-family:monospace;font-size:0.82rem;word-break:break-all;">{{ a.value }}</td>
+            <td><span class="report-count">{{ a.count }}</span></td>
+            <td><span class="threat-pill tp-{{ a.threat_level }}">{{ a.threat_level }}</span></td>
+            <td style="font-size:0.78rem;color:#778;">{{ a.first_seen }}</td>
+            <td style="font-size:0.78rem;color:#778;">{{ a.last_seen }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <p style="font-size:0.76rem;color:#AAB;margin-top:10px;">
+        💡 Velocity Tracker builds a local threat intelligence database from crowd-sourced reports.
+        Similar to how telecom companies build fraud blacklists from TRAI data.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Fraud type #}
+  {% if fraud_type %}
+  <div class="card">
+    <div class="card-head">🏷️ FRAUD CLASSIFICATION</div>
+    <div class="card-body">
+      <div class="ft-row">
+        <span class="ft-name">{{ fraud_type.category }}</span>
+        {% if fraud_type.ncrp_code != "TBD" %}
+          <span class="ncrp-pill">NCRP {{ fraud_type.ncrp_code }}</span>
+        {% else %}
+          <span class="uncertain-pill">⏳ Pending Admin Review</span>
+        {% endif %}
+      </div>
+      {% if result.risk_level == "UNCERTAIN" %}
+      <div class="review-note">
+        🔔 This message is <b>UNCERTAIN</b> and has been sent to the admin queue for manual review.
+        Once labeled, it will improve future model predictions.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# ══════════════════════════════════════════ #}
+  {# NOVEL FEATURE 2 — WORD RISK HEATMAP       #}
+  {# ══════════════════════════════════════════ #}
+  <div class="card">
+    <div class="card-head">
+      🌡️ WORD RISK HEATMAP — Token-Level Explainability
+      <span class="badge">Novel Feature</span>
+    </div>
+    <div class="card-body">
+      <div class="heatmap-legend">
+        <span style="font-size:0.78rem;font-weight:600;color:#445;margin-right:4px;">Risk Level:</span>
+        <span class="hl-item"><span class="hl-swatch" style="background:rgba(192,57,43,0.25);border-bottom:2px solid #C0392B;"></span>High (strong fraud signal)</span>
+        <span class="hl-item"><span class="hl-swatch" style="background:rgba(217,119,6,0.18);border-bottom:2px solid #D97706;"></span>Medium</span>
+        <span class="hl-item"><span class="hl-swatch" style="background:rgba(200,150,12,0.15);border-bottom:2px solid #C8960C;"></span>Low</span>
+        <span class="hl-item"><span class="hl-swatch" style="background:#E8EAF0;"></span>Safe / Neutral</span>
+      </div>
+
+      <div class="heatmap-text">
+        {% for token in word_heatmap %}
+          {% if token.level != "safe" %}
+            <span class="tok-wrap">
+              <span class="tok tok-{{ token.level }}">{{ token.word }}</span>
+              <span class="tok-tooltip">Score: {{ token.score }} · {{ token.level | upper }}</span>
+            </span>
+          {% else %}
+            <span class="tok tok-safe">{{ token.word }}</span>
+          {% endif %}
+          {# Add space between words #}
+          {{ " " }}
+        {% endfor %}
+      </div>
+
+      <div class="heatmap-note">
+        💡 Each word is coloured by its Logistic Regression fraud coefficient weight.
+        Hover over highlighted words to see their exact risk score.
+        Red words are the strongest fraud signals in this message.
+      </div>
+    </div>
+  </div>
+
+  {# Confidence bars #}
+  <div class="card">
+    <div class="card-head">📊 CONFIDENCE SCORES</div>
+    <div class="card-body">
+      <div class="bar-wrap">
+        <div class="bar-label"><span>🔴 Fraud Probability</span><span>{{ "%.1f"|format(result.fraud_probability * 100) }}%</span></div>
+        <div class="bar-outer"><div class="bar-inner bi-fraud" style="width:{{ result.fraud_probability * 100 }}%"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label"><span>🟢 Legitimate Probability</span><span>{{ "%.1f"|format(result.legit_probability * 100) }}%</span></div>
+        <div class="bar-outer"><div class="bar-inner bi-legit" style="width:{{ result.legit_probability * 100 }}%"></div></div>
+      </div>
+      <p class="model-note">Ensemble: LinearSVC 60% + LR 20% + MultinomialNB 20% · Threshold: {{ result.threshold_used }}</p>
+    </div>
+  </div>
+
+  {# Entities #}
+  <div class="card">
+    <div class="card-head">🔍 EXTRACTED DIGITAL EVIDENCE</div>
+    <div class="card-body">
+      <div class="eg">
+        <div class="ei">
+          <div class="ei-label">📞 Phone Numbers</div>
+          {% if entities.phones %}{% for p in entities.phones %}<span class="ei-tag">{{ p }}</span>{% endfor %}
+          {% else %}<span class="ei-none">None found</span>{% endif %}
+        </div>
+        <div class="ei">
+          <div class="ei-label">🔗 URLs</div>
+          {% if entities.urls %}{% for u in entities.urls %}<div style="font-size:0.77rem;word-break:break-all;margin-bottom:3px;color:var(--navy);font-weight:600;">{{ u }}</div>{% endfor %}
+          {% else %}<span class="ei-none">None found</span>{% endif %}
+        </div>
+        <div class="ei">
+          <div class="ei-label">💰 Amounts</div>
+          {% if entities.amounts %}{% for a in entities.amounts %}<span class="ei-tag">{{ a }}</span>{% endfor %}
+          {% else %}<span class="ei-none">None found</span>{% endif %}
+        </div>
+        <div class="ei">
+          <div class="ei-label">🔢 OTP / PIN</div>
+          {% if entities.otps %}{% for o in entities.otps %}<span class="ei-tag">{{ o }}</span>{% endfor %}
+          {% else %}<span class="ei-none">None found</span>{% endif %}
+        </div>
+        {% if entities.sender %}
+        <div class="ei">
+          <div class="ei-label">📤 Sender</div>
+          <span class="ei-tag">{{ entities.sender }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Keywords #}
+  {% if entities.keywords %}
+  <div class="card">
+    <div class="card-head">💡 TOP FRAUD TRIGGER KEYWORDS</div>
+    <div class="card-body">
+      <p style="font-size:0.8rem;color:#778;margin-bottom:10px;">Highest LR coefficient words from this message:</p>
+      {% for kw in entities.keywords %}<span class="kw-pill">{{ kw }}</span>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Actions #}
+  <div class="card">
+    <div class="card-body">
+      <div class="actions">
+        {% if show_pdf %}
+        <a class="btn-pdf" href="/download-complaint/{{ complaint_id }}" target="_blank">📄 Download NCRP Complaint PDF</a>
+        <a class="btn-ncrp" href="/ncrp-helper/{{ complaint_id }}" target="_blank">📋 NCRP Form Helper</a>
+        {% endif %}
+        <a class="btn-back" href="/">← Analyse Another</a>
+      </div>
+      {% if show_pdf %}
+      <p class="action-note">PDF includes velocity intelligence, word heatmap summary, and all evidence. NCRP Form Helper lets you copy each field directly to cybercrime.gov.in.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</main>
+<footer>Mini-project: Fraud/Spam Detection using Machine Learning — 6th Semester · For educational purposes</footer>
+</body>
+</html>
