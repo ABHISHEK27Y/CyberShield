@@ -1,4 +1,25 @@
 .env
 __pycache__/
 *.pyc
+*.pyo
+complaints/
+retrain.log
+pending_review.csv
+velocity_db.json
+cybershield.db
+instance/
+migrations/versions/
+.DS_Store
+*.pkl
+
+# Large datasets — DO NOT commit
 final_unified_dataset.csv
+master_dataset.csv
+master_dataset_full.csv
+combined_dataset.csv
+analysisdataset.csv
+Dataset_5971.csv
+data-en-hi-de-fr.csv
+fraud_dataset_v3.csv
+SMSSmishCollection.txt
+predictions.log

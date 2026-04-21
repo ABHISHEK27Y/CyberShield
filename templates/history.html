@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}My Complaint History — CyberShield Portal{% endblock %}
+{% block description %}CyberShield: Your personal fraud complaint history. View, download, and track all your submitted complaints.{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:1100px;padding:2rem;">
+
+  <!-- ── PAGE HEADER ── -->
+  <div style="margin-bottom:2rem;animation:fadeInUp 0.6s ease;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <h1 style="font-size:1.8rem;margin-bottom:0.3rem;">
+          <i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i>
+          &nbsp;Your Complaint History
+        </h1>
+        <p style="color:var(--text-muted);font-size:0.88rem;">
+          {{ total }} complaint{{ 's' if total != 1 }} filed &nbsp;·&nbsp;
+          Signed in as <b style="color:var(--text-main);">{{ user.email }}</b>
+        </p>
+      </div>
+      <a href="/" class="btn-secondary">
+        <i class="fa-solid fa-plus"></i> New Analysis
+      </a>
+    </div>
+  </div>
+
+  <!-- ── STATS ROW ── -->
+  <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:2rem;">
+    <div class="stat-card">
+      <div class="stat-n">{{ total }}</div>
+      <div class="stat-l">Total Filed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#fca5a5;">{{ counts.FRAUD }}</div>
+      <div class="stat-l">FRAUD</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#fcd34d;">{{ counts.SUSPICIOUS }}</div>
+      <div class="stat-l">SUSPICIOUS</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#a78bfa;">{{ counts.UNCERTAIN }}</div>
+      <div class="stat-l">UNCERTAIN</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#6ee7b7;">{{ counts.LEGIT }}</div>
+      <div class="stat-l">LEGIT</div>
+    </div>
+  </div>
+
+  <!-- ── COMPLAINTS TABLE ── -->
+  {% if complaints %}
+  <div class="admin-card" style="animation:fadeInUp 0.7s ease;">
+    <div class="admin-card-head">
+      <span><i class="fa-solid fa-list" style="color:var(--primary);"></i> &nbsp;Complaints</span>
+      <span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">
+        Showing {{ complaints|length }} of {{ total }}
+      </span>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Ref ID</th>
+            <th>Date &amp; Time</th>
+            <th>Risk</th>
+            <th>Category</th>
+            <th>Probability</th>
+            <th>Complainant</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in complaints %}
+          {% set rl = c.risk_level or 'UNKNOWN' %}
+          <tr>
+            <!-- Ref ID -->
+            <td>
+              <span style="font-family:monospace;font-size:0.82rem;
+                           background:rgba(139,92,246,0.1);color:#a78bfa;
+                           padding:3px 8px;border-radius:5px;">
+                {{ c.complaint_id }}
+              </span>
+            </td>
+
+            <!-- Timestamp -->
+            <td style="color:var(--text-muted);font-size:0.82rem;white-space:nowrap;">
+              {{ c.timestamp.strftime('%d %b %Y') if c.timestamp else '—' }}<br>
+              <span style="font-size:0.74rem;">{{ c.timestamp.strftime('%H:%M') if c.timestamp else '' }}</span>
+            </td>
+
+            <!-- Risk badge -->
+            <td>
+              {% if rl == 'FRAUD' %}
+                <span class="threat-pill tp-CRITICAL">🚨 FRAUD</span>
+              {% elif rl == 'SUSPICIOUS' %}
+                <span class="threat-pill tp-HIGH">⚠️ SUSPICIOUS</span>
+              {% elif rl == 'UNCERTAIN' %}
+                <span class="threat-pill tp-MEDIUM">🔎 UNCERTAIN</span>
+              {% else %}
+                <span class="threat-pill tp-LOW">✅ LEGIT</span>
+              {% endif %}
+            </td>
+
+            <!-- Category -->
+            <td style="font-size:0.82rem;max-width:180px;">
+              {{ c.fraud_category or '—' }}
+              {% if c.ncrp_code and c.ncrp_code != 'TBD' and c.ncrp_code != 'N/A' %}
+                <br><span style="font-size:0.72rem;color:var(--text-muted);">{{ c.ncrp_code }}</span>
+              {% endif %}
+            </td>
+
+            <!-- Probability -->
+            <td>
+              {% if c.fraud_probability is not none %}
+                {% set pct = (c.fraud_probability * 100)|round(1) %}
+                {% if pct >= 85 %}
+                  <span class="prob-badge pb-high">{{ pct }}%</span>
+                {% elif pct >= 45 %}
+                  <span class="prob-badge pb-med">{{ pct }}%</span>
+                {% else %}
+                  <span class="prob-badge pb-low">{{ pct }}%</span>
+                {% endif %}
+              {% else %}—{% endif %}
+            </td>
+
+            <!-- Complainant -->
+            <td style="font-size:0.82rem;color:var(--text-muted);">
+              {{ c.complainant_name or '—' }}
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                {% if rl in ('FRAUD','SUSPICIOUS') %}
+                <a href="/download-complaint/{{ c.complaint_id }}"
+                   style="font-size:0.76rem;padding:5px 10px;border-radius:7px;
+                          background:var(--gradient-hero);color:#fff;
+                          text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                  <i class="fa-solid fa-file-pdf"></i> PDF
+                </a>
+                <a href="/ncrp-helper/{{ c.complaint_id }}"
+                   style="font-size:0.76rem;padding:5px 10px;border-radius:7px;
+                          background:rgba(255,255,255,0.06);border:1px solid var(--border);
+                          color:var(--text-muted);text-decoration:none;
+                          display:inline-flex;align-items:center;gap:5px;">
+                  <i class="fa-solid fa-gavel"></i> NCRP
+                </a>
+                {% endif %}
+                <form method="POST" action="/complaint/{{ c.complaint_id }}/delete"
+                      onsubmit="return confirm('Delete this complaint permanently?');"
+                      style="display:inline;">
+                  <button type="submit"
+                          style="font-size:0.76rem;padding:5px 10px;border-radius:7px;
+                                 background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);
+                                 color:#fca5a5;cursor:pointer;font-family:inherit;">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── PAGINATION ── -->
+    {% if pagination and pagination.pages > 1 %}
+    <div style="padding:1rem 1.5rem;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;">
+      {% if pagination.has_prev %}
+        <a href="?page={{ pagination.prev_num }}" class="btn-secondary" style="padding:6px 14px;font-size:0.83rem;">
+          ← Prev
+        </a>
+      {% endif %}
+      {% for p in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+        {% if p %}
+          <a href="?page={{ p }}"
+             style="padding:6px 14px;border-radius:8px;border:1px solid var(--border);font-size:0.83rem;
+                    {% if p == pagination.page %}background:var(--gradient-hero);color:#fff;{% else %}color:var(--text-muted);{% endif %}">
+            {{ p }}
+          </a>
+        {% else %}
+          <span style="color:var(--text-muted);align-self:center;">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+        <a href="?page={{ pagination.next_num }}" class="btn-secondary" style="padding:6px 14px;font-size:0.83rem;">
+          Next →
+        </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <!-- ── EMPTY STATE ── -->
+  <div class="empty" style="padding:5rem 2rem;">
+    <div class="empty-icon">📋</div>
+    <h3 style="margin-bottom:0.5rem;">No complaints yet</h3>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">
+      Analyse a suspicious message to create your first complaint.
+    </p>
+    <a href="/" class="btn-primary">
+      <i class="fa-solid fa-magnifying-glass-chart"></i> Analyse a Message
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

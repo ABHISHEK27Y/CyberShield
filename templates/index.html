@@ -1,307 +1,182 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NCRP Fraud Detection Portal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy:     #0A1628;
-      --navy2:    #0F2040;
-      --gold:     #C8960C;
-      --saffron:  #E8650A;
-      --light:    #F5F6FA;
-      --mgray:    #CBD0DC;
-      --text:     #1a2440;
-    }
-    body { font-family: 'DM Sans', sans-serif; background: var(--light); color: var(--text); min-height: 100vh; }
+{% extends "base.html" %}
+{% block title %}CyberShield — AI-Powered Fraud Detection & Cybercrime Complaint Intelligence Portal{% endblock %}
+{% block description %}CyberShield: Paste any suspicious SMS, WhatsApp message or email. Get instant AI analysis, Word Risk Heatmap, and a ready-to-submit NCRP complaint PDF.{% endblock %}
 
-    /* ─── NAV ─── */
-    nav {
-      background: var(--navy);
-      padding: 0 32px;
-      display: flex;
-      align-items: center;
-      height: 60px;
-      gap: 14px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-    }
-    .nav-logo { font-size: 22px; }
-    .nav-title { color: #fff; font-size: 1rem; font-weight: 700; flex: 1; }
-    .nav-sub   { color: rgba(255,255,255,0.45); font-size: 0.75rem; display: block; font-weight: 400; }
-    .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-    .nav-user  { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.8); font-size: 0.82rem; }
-    .nav-avatar {
-      width: 32px; height: 32px; border-radius: 50%;
-      background: var(--gold); display: flex; align-items: center;
-      justify-content: center; font-size: 13px; font-weight: 700; color: #fff;
-    }
-    .nav-avatar img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-    .nav-link {
-      color: rgba(255,255,255,0.6); font-size: 0.8rem; text-decoration: none;
-      padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
-      transition: all 0.2s;
-    }
-    .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .nav-admin { background: rgba(200,150,12,0.2); border-color: var(--gold); color: var(--gold); }
+{% block content %}
+<div class="container">
 
-    /* ─── HERO ─── */
-    .hero {
-      background: linear-gradient(135deg, var(--navy) 0%, #112040 60%, #1a3060 100%);
-      padding: 56px 32px 48px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(200,150,12,0.1) 0%, transparent 65%);
-      top: -150px; right: -100px; border-radius: 50%;
-    }
-    .hero-badge {
-      display: inline-block;
-      background: rgba(232,101,10,0.15);
-      border: 1px solid rgba(232,101,10,0.4);
-      color: #FFB080;
-      font-size: 0.75rem;
-      padding: 5px 14px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-      letter-spacing: 0.5px;
-    }
-    .hero h1 {
-      font-family: 'DM Serif Display', serif;
-      color: #fff;
-      font-size: 2.2rem;
-      line-height: 1.2;
-      margin-bottom: 12px;
-    }
-    .hero p { color: rgba(255,255,255,0.6); font-size: 0.95rem; max-width: 520px; margin: 0 auto 28px; line-height: 1.6; }
-    .stat-row {
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-    .stat { text-align: center; }
-    .stat .n { font-size: 1.5rem; font-weight: 700; color: var(--gold); font-family: 'DM Serif Display', serif; }
-    .stat .l { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 2px; letter-spacing: 0.4px; }
-
-    /* ─── MAIN FORM AREA ─── */
-    main {
-      max-width: 820px;
-      margin: -24px auto 60px;
-      padding: 0 20px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
-      padding: 36px 40px;
-    }
-
-    .card-header {
-      display: flex; align-items: center; gap: 12px;
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--light);
-    }
-    .card-icon {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px;
-    }
-    .card-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--navy); }
-    .card-header p  { font-size: 0.82rem; color: #778; margin-top: 2px; }
-
-    label {
-      display: block; font-size: 0.82rem; font-weight: 600;
-      color: #445; margin-bottom: 7px; letter-spacing: 0.2px;
-    }
-    .req { color: var(--saffron); }
-    .opt {
-      background: #EEF1F8; color: #667; font-size: 0.7rem;
-      padding: 2px 7px; border-radius: 4px; margin-left: 5px;
-      font-weight: 500; vertical-align: middle;
-    }
-
-    textarea, input[type="text"] {
-      width: 100%; border: 1.5px solid #DDE0EC; border-radius: 10px;
-      padding: 11px 14px; font-size: 0.9rem; font-family: inherit;
-      background: #FAFBFF; color: var(--text); resize: vertical;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    textarea:focus, input:focus {
-      outline: none; border-color: var(--navy);
-      box-shadow: 0 0 0 3px rgba(10,22,40,0.07);
-      background: #fff;
-    }
-
-    .field { margin-bottom: 18px; }
-    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .char-count { font-size: 0.75rem; color: #AAB; text-align: right; margin-top: 4px; }
-
-    .info-strip {
-      background: linear-gradient(135deg, #EEF4FF, #F5F0FF);
-      border-left: 4px solid var(--navy);
-      border-radius: 0 8px 8px 0;
-      padding: 12px 16px;
-      font-size: 0.82rem; color: #445;
-      line-height: 1.6; margin-bottom: 22px;
-    }
-
-    .submit-btn {
-      width: 100%; padding: 15px;
-      background: linear-gradient(135deg, var(--navy), var(--navy2));
-      color: #fff; border: none; border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
-      font-weight: 700; cursor: pointer; letter-spacing: 0.3px;
-      transition: opacity 0.2s, transform 0.1s;
-      position: relative; overflow: hidden;
-    }
-    .submit-btn::after {
-      content: '';
-      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-      transition: left 0.4s;
-    }
-    .submit-btn:hover::after { left: 140%; }
-    .submit-btn:hover  { opacity: 0.92; }
-    .submit-btn:active { transform: scale(0.99); }
-
-    .error-box {
-      background: #FFF0EE; border: 1px solid #E8650A;
-      border-radius: 8px; padding: 11px 16px;
-      color: #a03000; font-size: 0.85rem; margin-bottom: 18px;
-    }
-
-    /* helpline strip */
-    .helpline {
-      background: var(--navy); color: rgba(255,255,255,0.7);
-      text-align: center; padding: 9px;
-      font-size: 0.78rem; letter-spacing: 0.3px;
-    }
-    .helpline b { color: var(--gold); }
-
-    footer { text-align: center; font-size: 0.75rem; color: #AAB; padding: 20px 0 32px; }
-
-    @media (max-width: 600px) {
-      .card { padding: 24px 18px; }
-      .row2 { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 1.7rem; }
-      .stat-row { gap: 20px; }
-    }
-  </style>
-</head>
-<body>
-
-<nav>
-  <span class="nav-logo">🛡️</span>
-  <div>
-    <span class="nav-title">NCRP Fraud Detection Portal</span>
-    <span class="nav-sub">Ministry of Home Affairs, Government of India</span>
-  </div>
-  <div class="nav-right">
-    {% if user and user.is_authenticated %}
-      <div class="nav-user">
-        <div class="nav-avatar">
-          {% if user.picture %}
-            <img src="{{ user.picture }}" alt="">
-          {% else %}
-            {{ user.name[0].upper() }}
-          {% endif %}
-        </div>
-        {{ user.name.split()[0] }}
+  <!-- ── HERO ── -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <span class="hero-badge">⚡ CyberShield &nbsp;·&nbsp; NCRP Aligned</span>
+      <h1>Detect <span class="highlight">Fraud.</span><br>Protect Yourself.</h1>
+      <p>CyberShield analyses any suspicious SMS, WhatsApp message, or email — delivering instant AI results, a Word Risk Heatmap, Velocity Tracking, and a ready-to-submit NCRP complaint PDF.</p>
+      <div class="cta-group">
+        <a href="#analyze-form" class="btn-primary-lg">
+          <i class="fa-solid fa-magnifying-glass"></i> Analyse Message
+        </a>
+        <a href="/model-details" class="btn-secondary">
+          <i class="fa-solid fa-chart-bar"></i> Model Details
+        </a>
       </div>
-      {% if user.is_admin %}
-        <a class="nav-link nav-admin" href="/admin">⚙ Admin</a>
+    </div>
+    <div class="hero-visual">
+      <div class="visual-circle"></div>
+      <div class="visual-card">
+        <div class="card-dots">
+          <div class="dot red"></div>
+          <div class="dot yellow"></div>
+          <div class="dot green"></div>
+        </div>
+        <div class="line w-90"></div>
+        <div class="line w-75"></div>
+        <div class="line w-50"></div>
+        <div class="line w-90"></div>
+        <div class="line w-75"></div>
+        <div class="status-badge-card">
+          <i class="fa-solid fa-triangle-exclamation"></i> FRAUD DETECTED — 94.7%
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ANALYSE FORM (centered) ── -->
+  <div id="analyze-form" style="max-width:700px;margin:2rem auto 0;padding-bottom:2rem;">
+    <div class="main-panel">
+      <div class="panel-title">
+        <i class="fa-solid fa-magnifying-glass-chart"></i>
+        <h2 style="margin:0;font-size:1.1rem;">Analyse a Suspicious Message</h2>
+      </div>
+
+      {% if error %}
+      <div class="error-box"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</div>
       {% endif %}
-      <a class="nav-link" href="/logout">Sign Out</a>
-    {% else %}
-      <a class="nav-link" href="/login">Sign In</a>
-    {% endif %}
-  </div>
-</nav>
 
-<div class="helpline">
-  National Cybercrime Helpline: <b>1930</b> &nbsp;·&nbsp; cybercrime.gov.in
+      <div class="info-strip">
+        <i class="fa-solid fa-circle-info"></i>&nbsp; <b>Detects:</b> OTP scams · KYC fraud · Phishing links · Lottery fraud · Loan/investment scams · Job scams · Government scheme fraud. Extracts phone numbers, URLs, amounts and generates an NCRP-formatted PDF complaint.
+      </div>
+
+      <form action="/analyze" method="POST">
+        <div class="form-group">
+          <label class="form-label">Suspicious Message <span class="req">*</span></label>
+          <textarea name="message" rows="6" maxlength="800"
+            placeholder="Paste the suspicious SMS, WhatsApp, or email here…"
+            oninput="document.getElementById('cc').textContent=this.value.length"
+            required></textarea>
+          <div class="char-count"><span id="cc">0</span> / 800</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Sender Number / Name <span class="req">*</span></label>
+            <input class="form-input" type="text" name="sender" placeholder="+91 98XXXXXXXX or VM-HDFCBK" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your Name <span class="opt">for PDF</span></label>
+            <input class="form-input" type="text" name="complainant_name"
+              value="{{ user.name if user and user.is_authenticated else '' }}"
+              placeholder="Full name for complaint">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Contact Number <span class="opt">for PDF</span></label>
+          <input class="form-input" type="tel" name="complainant_contact"
+                 placeholder="10-digit mobile number"
+                 pattern="[0-9]{10}" minlength="10" maxlength="10"
+                 oninput="this.value=this.value.replace(/\D/g,'')"
+                 title="Enter exactly 10 digits">
+        </div>
+
+        <button type="button" class="submit-btn" id="analyse-btn"
+                onclick="handleAnalyse(event)">
+          <span><i class="fa-solid fa-bolt"></i> &nbsp;Analyse Message Now</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── FEATURES (below form) ── -->
+  <section class="features-section" style="margin-top:2.5rem;">
+    <div class="feature-card">
+      <div class="icon-box"><i class="fa-solid fa-fire-flame-curved"></i></div>
+      <h3>Word Risk Heatmap</h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;">Every word coloured by its fraud coefficient weight — red is the strongest signal. Non-technical users see exactly what triggered the alert.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon-box"><i class="fa-solid fa-rotate"></i></div>
+      <h3>Velocity Tracker</h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;">Cross-complaint repeat offender detection. Phone numbers and URLs flagged across submissions — CRITICAL to LOW threat levels.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon-box"><i class="fa-solid fa-file-pdf"></i></div>
+      <h3>NCRP Complaint PDF</h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;">Auto-generates a filled NCRP-formatted PDF complaint. Includes evidence, velocity intelligence, and categorisation code.</p>
+    </div>
+  </section>
+
+
+
 </div>
 
-<div class="hero">
-  <span class="hero-badge">⚡ ML-Powered · 94.92% Accuracy</span>
-  <h1>Detect Fraud.<br>File Complaints Instantly.</h1>
-  <p>Paste any suspicious SMS, WhatsApp message, or email. Get instant AI analysis with a ready-to-submit NCRP complaint PDF.</p>
-  <div class="stat-row">
-    <div class="stat"><div class="n">26,531</div><div class="l">TRAINING SAMPLES</div></div>
-    <div class="stat"><div class="n">98.94%</div><div class="l">ROC-AUC</div></div>
-    <div class="stat"><div class="n">8</div><div class="l">FRAUD CATEGORIES</div></div>
-    <div class="stat"><div class="n">1930</div><div class="l">HELPLINE</div></div>
+<!-- ── LOGIN REQUIRED MODAL ── -->
+{% if not (user and user.is_authenticated) %}
+<div id="login-required-modal"
+     style="display:none;position:fixed;inset:0;z-index:9999;
+            background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);
+            align-items:center;justify-content:center;">
+  <div style="background:#141927;border:1px solid rgba(139,92,246,0.25);
+              border-radius:22px;padding:2.5rem 2rem;max-width:370px;width:90%;
+              box-shadow:0 30px 70px rgba(0,0,0,0.5);text-align:center;
+              animation:fadeInUp 0.25s ease;">
+    <div style="font-size:2.8rem;margin-bottom:0.75rem;">🔐</div>
+    <h3 style="font-size:1.2rem;margin-bottom:0.4rem;">Sign in to Analyse</h3>
+    <p style="color:rgba(255,255,255,0.45);font-size:0.86rem;margin-bottom:1.75rem;line-height:1.6;">
+      Your message is ready. Sign in with Google to run the AI analysis.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="document.getElementById('login-required-modal').style.display='none'"
+              class="btn-secondary"
+              style="padding:10px 20px;cursor:pointer;border:none;font-family:inherit;font-size:0.88rem;">
+        Cancel
+      </button>
+      <a href="/login"
+         style="padding:11px 24px;border-radius:11px;
+                background:linear-gradient(135deg,#6d28d9,#4f46e5);
+                color:#fff;text-decoration:none;font-size:0.9rem;font-weight:600;
+                display:inline-flex;align-items:center;gap:8px;">
+        <i class="fa-brands fa-google"></i> Sign in with Google
+      </a>
+    </div>
   </div>
 </div>
+<script>
+  function handleAnalyse(e) {
+    const form = document.querySelector('#analyse-btn').closest('form');
+    // trigger native HTML5 validation (pattern, minlength, required)
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    const msg = document.querySelector('textarea[name="message"]').value.trim();
+    if (!msg) return;
+    document.getElementById('login-required-modal').style.display = 'flex';
+  }
+  document.getElementById('login-required-modal').addEventListener('click', function(e){
+    if(e.target === this) this.style.display = 'none';
+  });
+</script>
+{% else %}
+<script>
+  function handleAnalyse(e) {
+    const form = document.querySelector('#analyse-btn').closest('form');
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    form.requestSubmit();
+  }
+</script>
+{% endif %}
 
-<main>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon">🔍</div>
-      <div>
-        <h2>Analyse a Suspicious Message</h2>
-        <p>Supports SMS · WhatsApp · Email in English</p>
-      </div>
-    </div>
-
-    {% if error %}
-    <div class="error-box">⚠️ {{ error }}</div>
-    {% endif %}
-
-    <div class="info-strip">
-      📌 <b>Detects:</b> OTP scams · KYC fraud · Phishing links · Lottery fraud · Loan/investment scams ·
-      Job scams · Government scheme fraud. Extracts phone numbers, URLs, amounts and generates an
-      NCRP-formatted PDF complaint.
-    </div>
-
-    <form action="/analyze" method="POST">
-      <div class="field">
-        <label>Suspicious Message <span class="req">*</span></label>
-        <textarea name="message" rows="6" maxlength="800"
-          placeholder="Paste the suspicious SMS, WhatsApp, or email here…"
-          oninput="document.getElementById('cc').textContent=this.value.length"
-          required></textarea>
-        <div class="char-count"><span id="cc">0</span> / 800</div>
-      </div>
-
-      <div class="row2">
-        <div class="field">
-          <label>Sender Number / Name <span class="opt">optional</span></label>
-          <input type="text" name="sender" placeholder="+91 98XXXXXXXX or VM-HDFCBK">
-        </div>
-        <div class="field">
-          <label>Your Name <span class="opt">for PDF</span></label>
-          <input type="text" name="complainant_name"
-            value="{{ user.name if user and user.is_authenticated else '' }}"
-            placeholder="Full name for complaint">
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Your Contact Number <span class="opt">for PDF</span></label>
-        <input type="text" name="complainant_contact" placeholder="10-digit mobile number">
-      </div>
-
-      <button type="submit" class="submit-btn">⚡ &nbsp;Analyse Message Now</button>
-    </form>
-  </div>
-</main>
-
-<footer>Mini-project: Fraud/Spam Detection using Machine Learning — 6th Semester &nbsp;·&nbsp; For educational purposes</footer>
-
-</body>
-</html>
+{% endblock %}

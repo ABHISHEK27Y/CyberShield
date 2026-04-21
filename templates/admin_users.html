@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}User Management — CyberShield Admin{% endblock %}
+{% block description %}CyberShield admin: manage registered users, complaint counts, and admin privileges.{% endblock %}
+
+{% block content %}
+<div class="admin-main">
+
+  <!-- ── PAGE TITLE ── -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1 style="font-size:1.6rem;margin-bottom:0.2rem;">
+        <i class="fa-solid fa-users" style="color:var(--primary);"></i> User Management
+      </h1>
+      <p style="color:var(--text-muted);font-size:0.85rem;">
+        All registered users · promote or demote admin access
+      </p>
+    </div>
+    <a href="/admin" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back to Admin</a>
+  </div>
+
+  <!-- ── FLASH MESSAGES ── -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash flash-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- ── STATS ROW ── -->
+  <div class="stats-grid" style="margin-bottom:2rem;">
+    <div class="stat-card">
+      <div class="stat-n">{{ total_users }}</div>
+      <div class="stat-l">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#a78bfa;">{{ admin_users_n }}</div>
+      <div class="stat-l">Admins</div>
+    </div>
+    <div class="stat-card labeled">
+      <div class="stat-n">{{ total_complaints }}</div>
+      <div class="stat-l">Total Complaints</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#fcd34d;">{{ today_complaints }}</div>
+      <div class="stat-l">Today's Reports</div>
+    </div>
+  </div>
+
+  <!-- ── USERS TABLE ── -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <span>
+        <i class="fa-solid fa-table" style="color:var(--primary);"></i>
+        &nbsp;Registered Users
+      </span>
+      <span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;">
+        {{ total_users }} user{{ 's' if total_users != 1 }}
+      </span>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Last Login</th>
+            <th>Complaints</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in users_data %}
+          {% set u = row.user %}
+          {% set cnt = row.complaint_count %}
+          <tr>
+            <!-- Avatar + name -->
+            <td>
+              <div style="display:flex;align-items:center;gap:10px;">
+                {% if u.picture %}
+                  <img src="{{ u.picture }}" alt="" style="width:32px;height:32px;border-radius:50%;
+                       border:2px solid var(--border);flex-shrink:0;">
+                {% else %}
+                  <div style="width:32px;height:32px;border-radius:50%;
+                              background:var(--gradient-hero);display:flex;
+                              align-items:center;justify-content:center;
+                              font-size:0.9rem;font-weight:700;flex-shrink:0;">
+                    {{ u.name[0]|upper if u.name else '?' }}
+                  </div>
+                {% endif %}
+                <span style="font-size:0.85rem;">{{ u.name or 'Unknown' }}</span>
+              </div>
+            </td>
+
+            <!-- Email -->
+            <td style="font-size:0.82rem;color:var(--text-muted);">{{ u.email }}</td>
+
+            <!-- Joined -->
+            <td style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">
+              {{ u.created_at.strftime('%d %b %Y') if u.created_at else '—' }}
+            </td>
+
+            <!-- Last Login -->
+            <td style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;">
+              {{ u.last_login.strftime('%d %b %Y') if u.last_login else 'Never' }}
+            </td>
+
+            <!-- Complaint count -->
+            <td>
+              <span style="font-size:1rem;font-weight:700;
+                           {% if cnt >= 5 %}color:#fca5a5;{% elif cnt >= 2 %}color:#fcd34d;{% else %}color:var(--text-main);{% endif %}">
+                {{ cnt }}
+              </span>
+            </td>
+
+            <!-- Role badge -->
+            <td>
+              {% if u.is_admin %}
+                <span style="background:rgba(139,92,246,0.2);color:#a78bfa;
+                             border:1px solid rgba(139,92,246,0.3);
+                             font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">
+                  🛡 Admin
+                </span>
+              {% else %}
+                <span style="background:rgba(255,255,255,0.05);color:var(--text-muted);
+                             border:1px solid var(--border);
+                             font-size:0.72rem;padding:3px 10px;border-radius:20px;">
+                  User
+                </span>
+              {% endif %}
+            </td>
+
+            <!-- Toggle admin -->
+            <td>
+              {% if u.id != user.id %}
+                {% if u.is_admin %}
+                  <button onclick="openRoleModal('{{ u.id }}', '{{ u.email }}', 'demote')"
+                          class="btn-fraud" style="font-size:0.76rem;cursor:pointer;border:none;font-family:inherit;">
+                    <i class="fa-solid fa-arrow-down"></i> Demote
+                  </button>
+                {% else %}
+                  <button onclick="openRoleModal('{{ u.id }}', '{{ u.email }}', 'promote')"
+                          class="btn-legit" style="font-size:0.76rem;cursor:pointer;border:none;font-family:inherit;">
+                    <i class="fa-solid fa-arrow-up"></i> Promote
+                  </button>
+                {% endif %}
+              {% else %}
+                <span style="font-size:0.76rem;color:var(--text-muted);">You</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7" style="text-align:center;padding:3rem;color:var(--text-muted);">
+              No registered users yet.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── PROMOTE / DEMOTE CUSTOM MODAL ── -->
+<div id="role-modal"
+     style="display:none;position:fixed;inset:0;z-index:9999;
+            background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);
+            align-items:center;justify-content:center;">
+  <div style="background:#141927;border:1px solid rgba(255,255,255,0.1);
+              border-radius:18px;padding:2rem 2.5rem;max-width:380px;width:90%;
+              box-shadow:0 25px 60px rgba(0,0,0,0.5);text-align:center;
+              animation:fadeInUp 0.25s ease;">
+    <div id="role-modal-icon" style="font-size:2.5rem;margin-bottom:0.75rem;"></div>
+    <h3 id="role-modal-title" style="margin-bottom:0.4rem;font-size:1.15rem;"></h3>
+    <p id="role-modal-body" style="color:var(--text-muted);font-size:0.87rem;margin-bottom:1.5rem;"></p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="document.getElementById('role-modal').style.display='none'"
+              class="btn-secondary"
+              style="padding:10px 24px;cursor:pointer;border:none;font-family:inherit;font-size:0.9rem;">
+        Cancel
+      </button>
+      <form id="role-modal-form" method="POST" style="display:inline;">
+        <button type="submit" id="role-modal-btn"
+                style="padding:10px 24px;border-radius:10px;border:none;
+                       color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;
+                       font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openRoleModal(userId, email, action) {
+    const modal  = document.getElementById('role-modal');
+    const form   = document.getElementById('role-modal-form');
+    const icon   = document.getElementById('role-modal-icon');
+    const title  = document.getElementById('role-modal-title');
+    const body   = document.getElementById('role-modal-body');
+    const btn    = document.getElementById('role-modal-btn');
+
+    form.action = '/admin/users/' + userId + '/toggle-admin';
+
+    if (action === 'promote') {
+      icon.textContent  = '⬆️';
+      title.textContent = 'Promote to Admin?';
+      body.textContent  = email + ' will get full admin access — can label fraud cases, view the threat database, and retrain the model.';
+      btn.style.background = 'linear-gradient(135deg,#6d28d9,#7c3aed)';
+      btn.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Promote';
+    } else {
+      icon.textContent  = '⬇️';
+      title.textContent = 'Demote to User?';
+      body.textContent  = email + ' will lose admin access and return to regular user.';
+      btn.style.background = 'linear-gradient(135deg,#c0392b,#e74c3c)';
+      btn.innerHTML = '<i class="fa-solid fa-arrow-down"></i> Demote';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  document.getElementById('role-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+</script>
+
+{% endblock %}

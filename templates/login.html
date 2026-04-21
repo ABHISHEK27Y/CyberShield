@@ -1,174 +1,172 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In — NCRP Fraud Portal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+{% extends "base.html" %}
+{% block title %}Sign In — CyberShield Portal{% endblock %}
+{% block description %}Sign in to CyberShield — AI-Powered Fraud Detection & Cybercrime Complaint Intelligence Portal.{% endblock %}
 
-    :root {
-      --navy:    #0A1628;
-      --gold:    #C8960C;
-      --saffron: #E8650A;
-      --light:   #F5F6FA;
-    }
+{% block head %}
+<style>
+  /* ── LOGIN PAGE STYLES ── */
+  .auth-container {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--navy);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-    }
+  .auth-card {
+    background: linear-gradient(160deg, rgba(20,25,40,0.97) 0%, rgba(13,17,30,0.97) 100%);
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(139,92,246,0.08), 0 30px 60px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+  }
 
-    /* Geometric background */
-    body::before {
-      content: '';
-      position: absolute;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(200,150,12,0.12) 0%, transparent 70%);
-      top: -100px; right: -100px;
-      border-radius: 50%;
-    }
-    body::after {
-      content: '';
-      position: absolute;
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(232,101,10,0.10) 0%, transparent 70%);
-      bottom: -80px; left: -80px;
-      border-radius: 50%;
-    }
+  /* subtle glow ring behind card */
+  .auth-card::before {
+    content: '';
+    position: absolute;
+    top: -80px; left: 50%;
+    transform: translateX(-50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
 
-    .card {
-      background: rgba(255,255,255,0.04);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 48px 44px;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.4);
-    }
+  /* ── ICON ── */
+  .auth-icon-wrap {
+    width: 80px; height: 80px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
 
-    .emblem {
-      font-size: 48px;
-      margin-bottom: 16px;
-      display: block;
-    }
+  .auth-icon-ring {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6d28d9, #4f46e5);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 8px rgba(109,40,217,0.15), 0 0 30px rgba(109,40,217,0.3);
+    animation: pulse-ring 3s ease-in-out infinite;
+  }
 
-    h1 {
-      font-family: 'DM Serif Display', serif;
-      color: #fff;
-      font-size: 1.6rem;
-      line-height: 1.2;
-      margin-bottom: 6px;
-    }
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 8px rgba(109,40,217,0.15), 0 0 30px rgba(109,40,217,0.3); }
+    50%       { box-shadow: 0 0 0 14px rgba(109,40,217,0.08), 0 0 45px rgba(109,40,217,0.4); }
+  }
 
-    .subtitle {
-      color: rgba(255,255,255,0.5);
-      font-size: 0.82rem;
-      margin-bottom: 36px;
-      line-height: 1.5;
-    }
+  .auth-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,0.1);
-    }
-    .divider span { color: rgba(255,255,255,0.3); font-size: 0.75rem; }
+  .auth-subtitle {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.84rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
 
-    .google-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-      padding: 14px 20px;
-      background: #fff;
-      color: #1a1a2e;
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    }
-    .google-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    }
-    .google-btn svg { flex-shrink: 0; }
+  .auth-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 1.25rem;
+    color: rgba(255,255,255,0.2);
+    font-size: 0.72rem; letter-spacing: 0.1em;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: rgba(255,255,255,0.08);
+  }
 
-    .skip-btn {
-      display: block;
-      margin-top: 16px;
-      color: rgba(255,255,255,0.4);
-      font-size: 0.82rem;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .skip-btn:hover { color: rgba(255,255,255,0.7); }
+  .google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    background: #fff;
+    color: #1a1a2e;
+    font-weight: 600; font-size: 0.95rem;
+    padding: 14px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    margin-bottom: 1rem;
+  }
+  .google-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  }
 
-    .flash {
-      background: rgba(232,101,10,0.2);
-      border: 1px solid var(--saffron);
-      border-radius: 8px;
-      padding: 10px 14px;
-      color: #FFB080;
-      font-size: 0.82rem;
-      margin-bottom: 20px;
-    }
+  .skip-btn {
+    display: block;
+    color: rgba(255,255,255,0.35);
+    font-size: 0.82rem;
+    text-decoration: none;
+    margin-bottom: 2rem;
+    transition: color 0.2s;
+  }
+  .skip-btn:hover { color: rgba(255,255,255,0.6); }
 
-    .badges {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 28px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.5);
-      font-size: 0.72rem;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <span class="emblem">🛡️</span>
-    <h1>NCRP Fraud Detection Portal</h1>
-    <p class="subtitle">Ministry of Home Affairs, Government of India<br>Sign in to analyse messages and file complaints</p>
+  .auth-badges {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .auth-badge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.35);
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card">
+
+    <!-- ── PREMIUM ICON ── -->
+    <div class="auth-icon-wrap">
+      <div class="auth-icon-ring">
+        <!-- Custom SVG shield with circuit / AI lines -->
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shield body -->
+          <path d="M20 3L5 9V20C5 28.5 11.8 36.4 20 38C28.2 36.4 35 28.5 35 20V9L20 3Z"
+                fill="url(#sg)" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+          <!-- Inner AI circuit lines -->
+          <path d="M13 18h4M23 18h4M20 13v4M20 23v4" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-linecap="round"/>
+          <!-- Center lock -->
+          <circle cx="20" cy="20" r="3.5" fill="white" fill-opacity="0.9"/>
+          <path d="M17 20v-2.5a3 3 0 016 0V20" stroke="white" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+          <defs>
+            <linearGradient id="sg" x1="5" y1="3" x2="35" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#a78bfa"/>
+              <stop offset="100%" stop-color="#4f46e5"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <div class="auth-title">CyberShield</div>
+    <p class="auth-subtitle">
+      AI-Powered Fraud Detection &amp;<br>Cybercrime Complaint Intelligence Portal
+    </p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for cat, msg in messages %}
-        <div class="flash">{{ msg }}</div>
+        <div class="flash-msg">{{ msg }}</div>
       {% endfor %}
     {% endwith %}
 
-    <div class="divider"><span>SIGN IN WITH</span></div>
+    <div class="auth-divider"><span>SIGN IN WITH</span></div>
 
     <a class="google-btn" href="{{ url_for('google.login') }}">
       <svg width="20" height="20" viewBox="0 0 48 48">
@@ -182,11 +180,11 @@
 
     <a class="skip-btn" href="/">← Continue without signing in</a>
 
-    <div class="badges">
-      <span class="badge">🔒 Secure OAuth 2.0</span>
-      <span class="badge">94.92% Accuracy</span>
-      <span class="badge">NCRP Aligned</span>
+    <div class="auth-badges">
+      <span class="auth-badge">🔒 Secure OAuth 2.0</span>
+      <span class="auth-badge">NCRP Aligned</span>
     </div>
+
   </div>
-</body>
-</html>
+</div>
+{% endblock %}

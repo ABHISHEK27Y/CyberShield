@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CyberShield — AI-Powered Fraud Detection Portal{% endblock %}</title>
+  <meta name="description" content="{% block description %}CyberShield: AI-Powered Fraud Detection & Cybercrime Complaint Intelligence Portal by Ministry of Home Affairs.{% endblock %}">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <div class="helpline-strip">
+    CyberShield &nbsp;·&nbsp; National Cybercrime Helpline: <b>1930</b> &nbsp;·&nbsp; cybercrime.gov.in &nbsp;·&nbsp; Ministry of Home Affairs, Government of India
+  </div>
+
+  <nav class="navbar">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px;">
+        <circle cx="11" cy="11" r="9.5" stroke="url(#lg)" stroke-width="1.5"/>
+        <circle cx="11" cy="11" r="5.5" stroke="url(#lg)" stroke-width="1"/>
+        <line x1="2" y1="11" x2="20" y2="11" stroke="url(#lg)" stroke-width="1"/>
+        <circle cx="11" cy="11" r="1.8" fill="url(#lg)"/>
+        <defs>
+          <linearGradient id="lg" x1="2" y1="2" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#a78bfa"/>
+            <stop offset="1" stop-color="#6d28d9"/>
+          </linearGradient>
+        </defs>
+      </svg>CyberShield
+    </div>
+    <div class="nav-links">
+
+      {% if not (user and user.is_authenticated and user.is_admin) %}
+      <a href="/" class="nav-item">
+        <i class="fa-solid fa-house"></i> Home
+      </a>
+      {% endif %}
+      {% if not (user and user.is_authenticated and user.is_admin) %}
+      <a href="/model-details" class="nav-item">
+        <i class="fa-solid fa-brain"></i> Model Details
+      </a>
+      {% endif %}
+      {% if user and user.is_authenticated and not user.is_admin %}
+        <a href="/history" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i> History
+        </a>
+      {% endif %}
+      {% if user and user.is_authenticated and user.is_admin %}
+        <a href="/admin" class="nav-item">
+          <i class="fa-solid fa-gear"></i> Admin
+        </a>
+        <a href="/admin/users" class="nav-item">
+          <i class="fa-solid fa-users"></i> Users
+        </a>
+      {% endif %}
+      {% if user and user.is_authenticated %}
+        <button onclick="document.getElementById('logout-modal').style.display='flex'"
+                class="btn-secondary"
+                style="font-size:0.85rem;display:flex;align-items:center;gap:7px;cursor:pointer;border:none;font-family:inherit;">
+          <i class="fa-regular fa-circle-user"></i>
+          {{ user.name.split()[0] }}
+          <span style="opacity:0.5;font-size:0.75rem;">·</span>
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      {% else %}
+        <a href="/login" class="btn-primary">
+          <i class="fa-brands fa-google"></i> Sign In
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- ── LOGOUT CONFIRMATION MODAL ── -->
+  {% if user and user.is_authenticated %}
+  <div id="logout-modal"
+       style="display:none;position:fixed;inset:0;z-index:9999;
+              background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);
+              align-items:center;justify-content:center;">
+    <div style="background:#141927;border:1px solid rgba(255,255,255,0.1);
+                border-radius:18px;padding:2rem 2.5rem;max-width:360px;width:90%;
+                box-shadow:0 25px 60px rgba(0,0,0,0.5);text-align:center;
+                animation:fadeInUp 0.25s ease;">
+      <div style="font-size:2.5rem;margin-bottom:0.75rem;">👋</div>
+      <h3 style="margin-bottom:0.4rem;font-size:1.15rem;">Sign out?</h3>
+      <p style="color:var(--text-muted);font-size:0.87rem;margin-bottom:1.5rem;">
+        Are you sure you want to sign out?
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="document.getElementById('logout-modal').style.display='none'"
+                class="btn-secondary"
+                style="padding:10px 24px;cursor:pointer;border:none;font-family:inherit;font-size:0.9rem;">
+          Cancel
+        </button>
+        <a href="/logout"
+           style="padding:10px 24px;border-radius:10px;
+                  background:linear-gradient(135deg,#c0392b,#e74c3c);
+                  color:#fff;text-decoration:none;font-size:0.9rem;font-weight:600;
+                  display:inline-flex;align-items:center;gap:6px;">
+          <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- close modal on backdrop click -->
+  <script>
+    document.getElementById('logout-modal').addEventListener('click', function(e){
+      if(e.target === this) this.style.display = 'none';
+    });
+  </script>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+  <footer>
+    <p>&copy; 2026 CyberShield — AI-Powered Fraud Detection &amp; Cybercrime Complaint Intelligence Portal &nbsp;·&nbsp; For educational purposes</p>
+  </footer>
+
+</body>
+</html>

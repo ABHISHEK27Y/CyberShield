@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Model Details — CyberShield Portal{% endblock %}
+{% block description %}CyberShield ML model architecture, metrics, and novel features powering AI-powered fraud detection.{% endblock %}
+
+{% block content %}
+<div class="container model-page">
+
+  <!-- ── HERO ── -->
+  <div class="model-hero">
+    <h1><span class="highlight">Model</span> Architecture</h1>
+    <p>CyberShield uses an ensemble of three battle-tested ML algorithms, trained on 26,531 real-world Indian smishing samples, delivering state-of-the-art fraud detection.</p>
+  </div>
+
+  <!-- ── KEY METRICS ── -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <span class="metric-icon">🎯</span>
+      <div class="metric-value">94.92%</div>
+      <div class="metric-label">Overall Accuracy</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">📈</span>
+      <div class="metric-value">98.94%</div>
+      <div class="metric-label">ROC-AUC Score</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">📊</span>
+      <div class="metric-value">26,531</div>
+      <div class="metric-label">Training Samples</div>
+    </div>
+    <div class="metric-card">
+      <span class="metric-icon">🏷️</span>
+      <div class="metric-value">8</div>
+      <div class="metric-label">Fraud Categories</div>
+    </div>
+  </div>
+
+  <!-- ── ALGORITHMS ── -->
+  <div class="r-card" style="margin-top:2rem;">
+    <div class="r-card-head">
+      <span><i class="fa-solid fa-microchip"></i>&nbsp; Ensemble Model Architecture</span>
+      <span class="badge-pill">Weighted Soft Voting</span>
+    </div>
+    <div class="r-card-body">
+      <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1.2rem;line-height:1.7;">
+        The final prediction is computed as a <b style="color:var(--text-main);">weighted average of probability scores</b> from three classifiers — each with complementary strengths for catching different fraud patterns.
+      </p>
+      <div class="algo-grid">
+        <div class="algo-card">
+          <div class="algo-header">
+            <span class="algo-name"><i class="fa-solid fa-swords" style="color:#a78bfa;"></i> LinearSVC</span>
+            <span class="algo-weight">60% weight</span>
+          </div>
+          <div class="algo-desc">
+            Support Vector Machine with linear kernel. Best at finding the maximum-margin hyperplane separating fraud from legit messages. Strongest performer in high-dimensional TF-IDF feature spaces. Uses Platt scaling for probability calibration.
+          </div>
+        </div>
+        <div class="algo-card">
+          <div class="algo-header">
+            <span class="algo-name"><i class="fa-solid fa-chart-line" style="color:#34d399;"></i> Logistic Regression</span>
+            <span class="algo-weight">20% weight</span>
+          </div>
+          <div class="algo-desc">
+            Provides well-calibrated probabilities and interpretable feature coefficients. Powers the <b>Word Risk Heatmap</b> — each word's coefficient directly maps to its visual risk colour in the explainability feature.
+          </div>
+        </div>
+        <div class="algo-card">
+          <div class="algo-header">
+            <span class="algo-name"><i class="fa-solid fa-flask" style="color:#fcd34d;"></i> MultinomialNB</span>
+            <span class="algo-weight">20% weight</span>
+          </div>
+          <div class="algo-desc">
+            Multinomial Naive Bayes — fast and effective for text classification. Captures word-frequency distributions well and provides a complementary probabilistic view, especially effective for phishing URL patterns.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── VECTORISATION ── -->
+  <div class="r-card" style="margin-top:1.2rem;">
+    <div class="r-card-head">
+      <span><i class="fa-solid fa-vector-square"></i>&nbsp; Feature Engineering — TF-IDF Vectorisation</span>
+    </div>
+    <div class="r-card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="ei">
+          <div class="ei-label">Word N-Grams</div>
+          <div style="font-size:0.88rem;color:var(--text-main);margin-top:6px;">Unigrams + Bigrams (1,2)</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;line-height:1.5;">Captures individual fraud keywords and two-word fraud phrases like "click here", "verify account", "OTP number".</div>
+        </div>
+        <div class="ei">
+          <div class="ei-label">Character N-Grams</div>
+          <div style="font-size:0.88rem;color:var(--text-main);margin-top:6px;">3-grams to 5-grams (3,5)</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;line-height:1.5;">Catches typo-based evasion, obfuscated words like "acc0unt", "0TP", and domain name fragments in phishing URLs.</div>
+        </div>
+        <div class="ei">
+          <div class="ei-label">Preprocessing Tokens</div>
+          <div style="font-size:0.88rem;color:var(--text-main);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;">
+            <span class="ei-tag">SUSPICIOUS_URL</span>
+            <span class="ei-tag">PHONE_NUMBER</span>
+            <span class="ei-tag">MONEY_AMOUNT</span>
+            <span class="ei-tag">OTP_NUMBER</span>
+          </div>
+        </div>
+        <div class="ei">
+          <div class="ei-label">Decision Thresholds</div>
+          <div style="font-size:0.85rem;color:var(--text-main);margin-top:6px;line-height:1.8;">
+            <span class="threat-pill tp-CRITICAL" style="margin-right:6px;">≥85%</span> FRAUD<br>
+            <span class="threat-pill tp-HIGH" style="margin-right:6px;">≥45%</span> SUSPICIOUS<br>
+            <span class="threat-pill tp-MEDIUM" style="margin-right:6px;">≥30%</span> UNCERTAIN<br>
+            <span class="threat-pill tp-LOW" style="margin-right:6px;">&lt;30%</span> LEGIT
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NOVEL FEATURES ── -->
+  <div style="margin-top:2rem;">
+    <h2 style="margin-bottom:1rem;font-size:1.3rem;">
+      <i class="fa-solid fa-star" style="color:var(--accent);"></i>&nbsp; Novel Features
+    </h2>
+    <div class="novel-grid">
+      <div class="novel-card">
+        <div class="icon-box"><i class="fa-solid fa-temperature-full"></i></div>
+        <h3>Word Risk Heatmap</h3>
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.7;margin-top:0.5rem;">
+          Token-level visual explainability using Logistic Regression coefficient weights. Every word in the original message is highlighted by its fraud signal strength — RED (high), AMBER (medium), GREEN (low). Non-technical fraud victims can immediately see what triggered the alert. No other student project implements this approach.
+        </p>
+        <div style="margin-top:10px;">
+          <span class="kw-pill">Token Scoring</span>
+          <span class="kw-pill">LR Coefficients</span>
+          <span class="kw-pill">Hover Tooltips</span>
+        </div>
+      </div>
+      <div class="novel-card">
+        <div class="icon-box"><i class="fa-solid fa-rotate"></i></div>
+        <h3>Fraud Velocity Tracker</h3>
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.7;margin-top:0.5rem;">
+          Cross-complaint repeat offender detection. Every phone number and URL in a FRAUD/SUSPICIOUS message is recorded in a persistent JSON threat intelligence database. Repeat offenders are escalated: LOW → MEDIUM → HIGH → CRITICAL. Modelled after how TRAI builds telecom fraud blacklists from crowd-sourced data.
+        </p>
+        <div style="margin-top:10px;">
+          <span class="kw-pill">Cross-Complaint Matching</span>
+          <span class="kw-pill">Persistent DB</span>
+          <span class="kw-pill">4-level Threat Scale</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DATASET ── -->
+  <div class="r-card" style="margin-top:1.5rem;margin-bottom:3rem;">
+    <div class="r-card-head">
+      <span><i class="fa-solid fa-database"></i>&nbsp; Dataset & Training</span>
+    </div>
+    <div class="r-card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+        <div class="ei">
+          <div class="ei-label">Primary Dataset</div>
+          <div style="font-size:0.85rem;color:var(--text-main);margin-top:4px;line-height:1.6;">English SMS/Email smishing and phishing samples. Combines multiple Indian cybercrime datasets.</div>
+        </div>
+        <div class="ei">
+          <div class="ei-label">Composition</div>
+          <div style="font-size:0.85rem;color:var(--text-main);margin-top:4px;line-height:1.6;">26,531 labeled messages across 8 fraud categories. Balanced with stratified sampling.</div>
+        </div>
+        <div class="ei">
+          <div class="ei-label">Human-in-the-Loop</div>
+          <div style="font-size:0.85rem;color:var(--text-main);margin-top:4px;line-height:1.6;">UNCERTAIN cases go to admin review → labeled samples appended to dataset → model retrained on-demand.</div>
+        </div>
+        <div class="ei">
+          <div class="ei-label">Fraud Categories</div>
+          <div style="font-size:0.85rem;color:var(--text-main);margin-top:6px;">
+            <span class="ei-tag">OTP Scam</span>
+            <span class="ei-tag">KYC Fraud</span>
+            <span class="ei-tag">Lottery</span>
+            <span class="ei-tag">Loan Fraud</span>
+            <span class="ei-tag">Phishing</span>
+            <span class="ei-tag">Job Scam</span>
+            <span class="ei-tag">Gov Scheme</span>
+            <span class="ei-tag">Unknown</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

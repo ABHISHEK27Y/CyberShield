@@ -1,5 +1,5 @@
 # ============================================================
-# FRAUD DETECTION SYSTEM — FINAL VERSION
+# FRAUD DETECTION SYSTEM -- FINAL VERSION
 # ============================================================
 
 import pandas as pd
@@ -175,7 +175,7 @@ if __name__ == '__main__':
             best_weights = (w1, w2, w3)
 
     W_LR, W_SVM, W_NB = best_weights
-    print(f"Best weights → LR: {W_LR}, SVM: {W_SVM}, NB: {W_NB}  "
+    print(f"Best weights -> LR: {W_LR}, SVM: {W_SVM}, NB: {W_NB}  "
           f"(val macro-F1: {best_f1:.4f})\n")
 
     def ensemble_proba(X_vec):
@@ -290,7 +290,7 @@ if __name__ == '__main__':
             "weights" : best_weights
         }, f)
 
-    print("Model saved → final_vectorizer.pkl + final_models.pkl")
+    print("Model saved -> final_vectorizer.pkl + final_models.pkl")
 
     # ----------------------------------------------------------
     # 12. PREDICTION FUNCTION

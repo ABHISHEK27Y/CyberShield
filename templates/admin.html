@@ -1,125 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel — NCRP Portal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy:#0A1628; --gold:#C8960C; --saffron:#E8650A;
-      --light:#F5F6FA; --mgray:#CBD0DC; --text:#1a2440;
-      --green:#1A7A35; --red:#C0392B;
-    }
-    body { font-family:'DM Sans',sans-serif; background:var(--light); color:var(--text); }
+{% extends "base.html" %}
+{% block title %}Admin Panel — CyberShield Portal{% endblock %}
+{% block description %}CyberShield admin panel for Human-in-the-Loop fraud detection. Label uncertain cases and retrain the ML model.{% endblock %}
 
-    nav {
-      background:var(--navy); padding:0 32px;
-      display:flex; align-items:center; height:60px; gap:14px;
-    }
-    .nav-title { color:#fff; font-size:1rem; font-weight:700; flex:1; }
-    .nav-sub { color:rgba(255,255,255,0.45); font-size:0.75rem; display:block; }
-    .admin-badge { background:rgba(200,150,12,0.2); border:1px solid var(--gold); color:var(--gold); font-size:0.78rem; padding:4px 12px; border-radius:20px; font-weight:600; }
-    .nav-link { color:rgba(255,255,255,0.6); font-size:0.8rem; text-decoration:none; padding:6px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.15); }
-    .nav-link:hover { background:rgba(255,255,255,0.08); color:#fff; }
-
-    main { max-width:1040px; margin:28px auto; padding:0 20px 60px; }
-
-    /* STATS GRID */
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px; }
-    .stat-card { background:#fff; border-radius:12px; box-shadow:0 3px 16px rgba(0,0,0,0.07); padding:18px; text-align:center; }
-    .stat-n { font-family:'DM Serif Display',serif; font-size:2rem; color:var(--navy); }
-    .stat-l { font-size:0.72rem; color:#778; margin-top:4px; text-transform:uppercase; letter-spacing:0.4px; }
-    .stat-card.critical .stat-n { color:var(--red); }
-    .stat-card.high .stat-n     { color:var(--saffron); }
-    .stat-card.labeled .stat-n  { color:var(--green); }
-
-    /* FLASH */
-    .flash { border-radius:8px; padding:11px 16px; margin-bottom:16px; font-size:0.88rem; }
-    .flash-success { background:#EAF7EE; border:1px solid var(--green); color:#0A4A1A; }
-    .flash-error   { background:#FFF0EE; border:1px solid var(--saffron); color:#7A1500; }
-
-    /* CARDS */
-    .card { background:#fff; border-radius:14px; box-shadow:0 3px 20px rgba(0,0,0,0.07); overflow:hidden; margin-bottom:22px; }
-    .card-head {
-      background:var(--navy); color:#fff; padding:13px 20px;
-      font-size:0.88rem; font-weight:700; letter-spacing:0.4px;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    .card-head span { display:flex; align-items:center; gap:8px; }
-
-    /* TABLE */
-    table { width:100%; border-collapse:collapse; }
-    th { background:var(--light); text-align:left; padding:9px 14px; font-size:0.72rem; color:#667; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; border-bottom:1px solid var(--mgray); }
-    td { padding:12px 14px; font-size:0.83rem; border-bottom:1px solid #F0F2F8; vertical-align:middle; }
-    tr:last-child td { border-bottom:none; }
-    tr:hover td { background:#FAFBFF; }
-
-    .msg-preview { max-width:280px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:0.82rem; color:#445; }
-    .msg-full { display:none; font-size:0.79rem; background:#F5F6FA; border-radius:6px; padding:8px 10px; margin-top:6px; white-space:pre-wrap; word-break:break-word; max-width:300px; }
-    .expand-btn { font-size:0.72rem; color:var(--navy); cursor:pointer; text-decoration:underline; margin-top:3px; display:block; }
-
-    .prob-badge { display:inline-block; font-size:0.75rem; font-weight:700; padding:3px 9px; border-radius:20px; }
-    .pb-high   { background:#FDECEA; color:var(--red); }
-    .pb-med    { background:#FFF3E0; color:var(--saffron); }
-    .pb-low    { background:#FFF8E8; color:var(--gold); }
-
-    .status-labeled   { color:var(--green); font-weight:600; font-size:0.8rem; }
-    .status-unlabeled { color:#AAB; font-size:0.8rem; }
-
-    .label-form { display:flex; gap:7px; }
-    .btn-fraud { padding:6px 12px; border:none; border-radius:7px; background:var(--red); color:#fff; font-size:0.76rem; font-family:inherit; font-weight:700; cursor:pointer; }
-    .btn-legit { padding:6px 12px; border:none; border-radius:7px; background:var(--green); color:#fff; font-size:0.76rem; font-family:inherit; font-weight:700; cursor:pointer; }
-    .btn-fraud:hover, .btn-legit:hover { opacity:0.85; }
-
-    .empty { text-align:center; padding:48px 20px; color:#AAB; }
-    .empty-icon { font-size:3rem; margin-bottom:12px; }
-
-    /* RETRAIN */
-    .retrain-card { background:#fff; border-radius:14px; box-shadow:0 3px 20px rgba(0,0,0,0.07); padding:22px; margin-bottom:22px; }
-    .retrain-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-    .retrain-title { font-family:'DM Serif Display',serif; font-size:1.1rem; color:var(--navy); }
-    .retrain-sub { font-size:0.8rem; color:#778; margin-top:3px; }
-    .btn-retrain { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,var(--navy),#1a3278); color:#fff; border:none; border-radius:10px; padding:11px 22px; font-size:0.88rem; font-family:inherit; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(10,22,40,0.2); }
-    .btn-retrain:hover { opacity:0.88; }
-    .log-box { display:none; margin-top:14px; background:#0A1628; color:#7FFF9A; font-family:'Courier New',monospace; font-size:0.76rem; padding:14px; border-radius:8px; height:180px; overflow-y:auto; white-space:pre-wrap; }
-    .btn-log { background:none; border:1px solid var(--mgray); border-radius:6px; padding:6px 12px; font-size:0.78rem; color:#667; cursor:pointer; margin-top:10px; }
-
-    /* VELOCITY SECTION */
-    .vel-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-    .vel-col h4 { font-size:0.8rem; font-weight:700; color:#445; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:10px; }
-    .vel-row { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--light); border-radius:7px; margin-bottom:6px; font-size:0.82rem; }
-    .vel-val { font-family:monospace; font-size:0.8rem; color:var(--navy); font-weight:600; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .vel-count { font-family:'DM Serif Display',serif; font-size:1.1rem; color:var(--red); font-weight:700; }
-
-    .threat-pill { display:inline-block; font-size:0.7rem; font-weight:700; padding:2px 7px; border-radius:20px; }
-    .tp-CRITICAL { background:#FDECEA; color:var(--red); }
-    .tp-HIGH     { background:#FFF0E8; color:var(--saffron); }
-    .tp-MEDIUM   { background:#FFF8E0; color:var(--gold); }
-
-    /* HITL BOX */
-    .hitl-box { background:linear-gradient(135deg,#EEF4FF,#F5F0FF); border-left:4px solid var(--navy); border-radius:0 10px 10px 0; padding:13px 16px; margin-bottom:20px; font-size:0.82rem; color:#334; line-height:1.65; }
-    .hitl-box strong { color:var(--navy); }
-
-    @media (max-width:640px) { .vel-grid { grid-template-columns:1fr; } }
-  </style>
-</head>
-<body>
-
-<nav>
-  <span style="font-size:22px">🛡️</span>
-  <div>
-    <span class="nav-title">NCRP Fraud Detection — Admin Panel</span>
-    <span class="nav-sub">Human-in-the-Loop · Velocity Intelligence · Retrain Control</span>
-  </div>
-  <span class="admin-badge">⚙ ADMIN · {{ user.email }}</span>
-  <a class="nav-link" href="/" style="margin-left:10px">← Portal</a>
-  <a class="nav-link" href="/logout">Sign Out</a>
-</nav>
-
-<main>
+{% block content %}
+<div class="admin-main">
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% for cat, msg in messages %}
@@ -127,114 +11,127 @@
     {% endfor %}
   {% endwith %}
 
-  {# ── STATS ── #}
+  <div style="margin-bottom:1.5rem;">
+    <h1 style="font-size:1.6rem;margin-bottom:0.2rem;"><i class="fa-solid fa-gear" style="color:var(--primary);"></i> CyberShield Admin</h1>
+    <p style="color:var(--text-muted);font-size:0.85rem;">Human-in-the-Loop · Velocity Intelligence · Retrain Control · {{ user.email }}</p>
+  </div>
+
+  <!-- ── STATS GRID ── -->
   {% set total     = pending | length %}
   {% set labeled   = pending | selectattr('admin_label') | list | length %}
   {% set unlabeled = total - labeled %}
   <div class="stats-grid">
-    <div class="stat-card"><div class="stat-n">{{ total }}</div><div class="stat-l">Total Uncertain</div></div>
-    <div class="stat-card"><div class="stat-n" style="color:var(--saffron)">{{ unlabeled }}</div><div class="stat-l">Awaiting Review</div></div>
-    <div class="stat-card labeled"><div class="stat-n">{{ labeled }}</div><div class="stat-l">Labeled & Saved</div></div>
-    <div class="stat-card critical"><div class="stat-n">{{ vstats.critical_count }}</div><div class="stat-l">CRITICAL Indicators</div></div>
-    <div class="stat-card high"><div class="stat-n">{{ vstats.total_phones }}</div><div class="stat-l">Tracked Phones</div></div>
-    <div class="stat-card"><div class="stat-n">{{ vstats.total_urls }}</div><div class="stat-l">Tracked URLs</div></div>
+    <div class="stat-card">
+      <div class="stat-n">{{ total }}</div>
+      <div class="stat-l">Total Uncertain</div>
+    </div>
+    <div class="stat-card high">
+      <div class="stat-n">{{ unlabeled }}</div>
+      <div class="stat-l">Awaiting Review</div>
+    </div>
+    <div class="stat-card labeled">
+      <div class="stat-n">{{ labeled }}</div>
+      <div class="stat-l">Labeled & Saved</div>
+    </div>
+    <div class="stat-card critical">
+      <div class="stat-n">{{ vstats.critical_count }}</div>
+      <div class="stat-l">CRITICAL Indicators</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n" style="color:#fcd34d;">{{ vstats.total_phones }}</div>
+      <div class="stat-l">Tracked Phones</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-n">{{ vstats.total_urls }}</div>
+      <div class="stat-l">Tracked URLs</div>
+    </div>
   </div>
 
-  {# ── HITL EXPLANATION ── #}
-  <div class="hitl-box">
-    <strong>🧠 Human-in-the-Loop Active</strong> — UNCERTAIN predictions (30–45% probability) appear below for manual review.
-    Label each one → it is appended to <code>master_dataset.csv</code> → click <b>Retrain</b> to apply.
-    The model continuously improves from real Indian fraud messages.<br><br>
-    <strong>🔁 Velocity Tracker Active</strong> — Every FRAUD/SUSPICIOUS report updates the threat intelligence database.
-    Repeat phone numbers and URLs are automatically flagged with escalating threat levels (LOW → MEDIUM → HIGH → CRITICAL).
-  </div>
 
-  {# ── VELOCITY INTELLIGENCE DASHBOARD ── #}
+  <!-- ── VELOCITY INTELLIGENCE ── -->
   {% if vstats.top_phones or vstats.top_urls %}
-  <div class="card">
-    <div class="card-head">
-      <span>🔁 VELOCITY TRACKER — Threat Intelligence Database</span>
-      <span style="font-size:0.75rem;font-weight:400;color:rgba(255,255,255,0.6)">
-        {{ vstats.total_phones }} phones · {{ vstats.total_urls }} URLs tracked
-      </span>
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <span><i class="fa-solid fa-rotate"></i>&nbsp; Velocity Tracker — Threat Intelligence Database</span>
+      <span style="font-size:0.78rem;font-weight:400;color:var(--text-muted);">{{ vstats.total_phones }} phones · {{ vstats.total_urls }} URLs tracked</span>
     </div>
-    <div class="card-body">
-      <div class="vel-grid">
-        <div class="vel-col">
-          <h4>📞 Top Reported Phone Numbers</h4>
-          {% if vstats.top_phones %}
-            {% for phone, entry in vstats.top_phones %}
-            <div class="vel-row">
-              <div>
-                <div class="vel-val">{{ phone }}</div>
-                <div style="font-size:0.7rem;color:#AAB;margin-top:2px;">Last: {{ entry.last_seen[:10] }}</div>
-              </div>
-              <div style="text-align:right;">
-                <div class="vel-count">{{ entry.count }}×</div>
-                {% if entry.count >= 4 %}<span class="threat-pill tp-CRITICAL">CRITICAL</span>
-                {% elif entry.count >= 3 %}<span class="threat-pill tp-HIGH">HIGH</span>
-                {% elif entry.count >= 2 %}<span class="threat-pill tp-MEDIUM">MEDIUM</span>{% endif %}
-              </div>
+    <div class="vel-grid">
+      <div class="vel-col">
+        <h4>📞 Top Reported Phone Numbers</h4>
+        {% if vstats.top_phones %}
+          {% for phone, entry in vstats.top_phones %}
+          <div class="vel-row">
+            <div>
+              <div class="vel-val">{{ phone }}</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">Last: {{ entry.last_seen[:10] }}</div>
             </div>
-            {% endfor %}
-          {% else %}
-            <div style="color:#AAB;font-size:0.82rem;padding:10px 0;">No phone data yet.</div>
-          {% endif %}
-        </div>
-        <div class="vel-col">
-          <h4>🔗 Top Reported URLs</h4>
-          {% if vstats.top_urls %}
-            {% for url, entry in vstats.top_urls %}
-            <div class="vel-row">
-              <div>
-                <div class="vel-val" title="{{ url }}">{{ url[:40] }}{% if url|length > 40 %}…{% endif %}</div>
-                <div style="font-size:0.7rem;color:#AAB;margin-top:2px;">Last: {{ entry.last_seen[:10] }}</div>
-              </div>
-              <div style="text-align:right;">
-                <div class="vel-count">{{ entry.count }}×</div>
-                {% if entry.count >= 4 %}<span class="threat-pill tp-CRITICAL">CRITICAL</span>
-                {% elif entry.count >= 3 %}<span class="threat-pill tp-HIGH">HIGH</span>
-                {% elif entry.count >= 2 %}<span class="threat-pill tp-MEDIUM">MEDIUM</span>{% endif %}
-              </div>
+            <div style="text-align:right;">
+              <div class="vel-count">{{ entry.count }}×</div>
+              {% if entry.count >= 4 %}<span class="threat-pill tp-CRITICAL">CRITICAL</span>
+              {% elif entry.count >= 3 %}<span class="threat-pill tp-HIGH">HIGH</span>
+              {% elif entry.count >= 2 %}<span class="threat-pill tp-MEDIUM">MEDIUM</span>{% endif %}
             </div>
-            {% endfor %}
-          {% else %}
-            <div style="color:#AAB;font-size:0.82rem;padding:10px 0;">No URL data yet.</div>
-          {% endif %}
-        </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="color:var(--text-muted);font-size:0.82rem;padding:10px 0;">No phone data yet.</div>
+        {% endif %}
       </div>
-      <p style="font-size:0.74rem;color:#AAB;margin-top:8px;">
-        Full database: <a href="/admin/velocity-db" target="_blank" style="color:var(--navy);">GET /admin/velocity-db</a>
-      </p>
+      <div class="vel-col">
+        <h4>🔗 Top Reported URLs</h4>
+        {% if vstats.top_urls %}
+          {% for url, entry in vstats.top_urls %}
+          <div class="vel-row">
+            <div>
+              <div class="vel-val" title="{{ url }}">{{ url[:40] }}{% if url|length > 40 %}…{% endif %}</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">Last: {{ entry.last_seen[:10] }}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="vel-count">{{ entry.count }}×</div>
+              {% if entry.count >= 4 %}<span class="threat-pill tp-CRITICAL">CRITICAL</span>
+              {% elif entry.count >= 3 %}<span class="threat-pill tp-HIGH">HIGH</span>
+              {% elif entry.count >= 2 %}<span class="threat-pill tp-MEDIUM">MEDIUM</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div style="color:var(--text-muted);font-size:0.82rem;padding:10px 0;">No URL data yet.</div>
+        {% endif %}
+      </div>
     </div>
+    <p style="font-size:0.74rem;color:var(--text-muted);padding:0 1.5rem 1rem;">
+      Full database: <a href="/admin/velocity-db" target="_blank" style="color:var(--primary);">GET /admin/velocity-db</a>
+    </p>
   </div>
   {% endif %}
 
-  {# ── RETRAIN ── #}
+  <!-- ── RETRAIN ── -->
   <div class="retrain-card">
     <div class="retrain-header">
       <div>
-        <div class="retrain-title">🔄 Retrain Model</div>
+        <div class="retrain-title"><i class="fa-solid fa-arrows-rotate" style="color:var(--primary);"></i> Retrain Model</div>
         <div class="retrain-sub">Runs pipefinal.py with all labeled samples. ~2–5 minutes.</div>
       </div>
       <form method="POST" action="/admin/retrain"
             onsubmit="document.getElementById('rbtn').textContent='🔄 Starting…'">
-        <button class="btn-retrain" id="rbtn" type="submit">🚀 Retrain Now</button>
+        <button class="btn-retrain" id="rbtn" type="submit">
+          <i class="fa-solid fa-rocket"></i> Retrain Now
+        </button>
       </form>
     </div>
     <button class="btn-log" onclick="toggleLog()">📜 Show Retrain Log</button>
     <div class="log-box" id="logBox">Fetching…</div>
   </div>
 
-  {# ── PENDING REVIEW ── #}
-  <div class="card">
-    <div class="card-head">
-      <span>🔎 UNCERTAIN CASES — Awaiting Label</span>
-      <span style="font-size:0.75rem;font-weight:400;color:rgba(255,255,255,0.6)">{{ unlabeled }} pending</span>
+  <!-- ── PENDING REVIEW ── -->
+  <div class="admin-card">
+    <div class="admin-card-head">
+      <span><i class="fa-solid fa-magnifying-glass"></i>&nbsp; Uncertain Cases — Awaiting Label</span>
+      <span style="font-size:0.78rem;font-weight:400;color:var(--text-muted);">{{ unlabeled }} pending</span>
     </div>
-    <div class="card-body" style="padding:0;">
-      {% if pending %}
-      <table>
+    {% if pending %}
+    <div style="overflow-x:auto;">
+      <table class="admin-table">
         <thead>
           <tr>
             <th>ID</th><th>Time</th><th>Message</th>
@@ -244,8 +141,8 @@
         <tbody>
           {% for item in pending | reverse %}
           <tr>
-            <td><code style="font-size:0.78rem;color:var(--navy)">{{ item.id }}</code></td>
-            <td style="font-size:0.75rem;color:#778;white-space:nowrap">
+            <td><code style="font-size:0.78rem;color:var(--primary);">{{ item.id }}</code></td>
+            <td style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;">
               {{ item.timestamp[:16].replace('T',' ') if item.timestamp else '—' }}
             </td>
             <td>
@@ -262,7 +159,7 @@
             <td>
               {% if item.admin_label %}
                 <span class="status-labeled">✅ {{ item.admin_label | upper }}<br>
-                  <span style="font-weight:400;font-size:0.73rem;color:#778">{{ item.labeled_by.split('@')[0] }}</span>
+                  <span style="font-weight:400;font-size:0.73rem;color:var(--text-muted);">{{ item.labeled_by.split('@')[0] }}</span>
                 </span>
               {% else %}<span class="status-unlabeled">⏳ Pending</span>{% endif %}
             </td>
@@ -273,23 +170,23 @@
                 <button class="btn-fraud" name="label" value="fraud">🚨 Fraud</button>
                 <button class="btn-legit" name="label" value="legit">✅ Legit</button>
               </form>
-              {% else %}<span style="font-size:0.75rem;color:#AAB">Done</span>{% endif %}
+              {% else %}<span style="font-size:0.75rem;color:var(--text-muted);">Done</span>{% endif %}
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
-      {% else %}
-      <div class="empty">
-        <div class="empty-icon">🎉</div>
-        <div>No uncertain cases yet.</div>
-        <div style="font-size:0.76rem;margin-top:5px">UNCERTAIN predictions will appear here for manual labeling.</div>
-      </div>
-      {% endif %}
     </div>
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">🎉</div>
+      <div style="color:var(--text-main);">No uncertain cases yet.</div>
+      <div style="font-size:0.76rem;margin-top:5px;">UNCERTAIN predictions will appear here for manual labeling.</div>
+    </div>
+    {% endif %}
   </div>
 
-</main>
+</div>
 
 <script>
 function toggleMsg(el) {
@@ -313,5 +210,4 @@ function fetchLog() {
 }
 setInterval(()=>{ if(logVisible) fetchLog(); }, 4000);
 </script>
-</body>
-</html>
+{% endblock %}

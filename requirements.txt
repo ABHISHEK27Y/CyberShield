@@ -1,0 +1,11 @@
+flask
+flask-dance
+flask-login
+flask-sqlalchemy
+flask-migrate
+psycopg2-binary
+reportlab
+scikit-learn
+numpy
+python-dotenv
+gunicorn
