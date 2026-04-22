@@ -1,0 +1,84 @@
+Total samples  : 26533
+Fraud (1)      : 12852
+Legit (0)      : 13681
+Fraud ratio    : 48.44%
+
+Train : 18573 | Val : 3980 | Test : 3980
+
+Vectorizing...
+Training base models...
+Base models trained.
+
+Tuning ensemble weights on validation set...
+Best weights -> LR: 0.2, SVM: 0.5, NB: 0.3  (val macro-F1: 0.9426)
+
+--- RESULTS BEFORE HARD NEGATIVE RETRAINING (on val set) ---
+Accuracy  : 0.9427
+ROC-AUC   : 0.9855
+              precision    recall  f1-score   support
+
+       Legit       0.94      0.95      0.95      2052
+       Fraud       0.95      0.93      0.94      1928
+
+    accuracy                           0.94      3980
+   macro avg       0.94      0.94      0.94      3980
+weighted avg       0.94      0.94      0.94      3980
+
+Confusion Matrix:
+[[1959   93]
+ [ 135 1793]]
+
+Mining hard negatives from validation set...
+Hard examples found: 228
+
+Hard negative retraining complete.
+
+--- FINAL RESULTS ON TEST SET ---
+Accuracy   : 0.9485
+ROC-AUC    : 0.9899
+              precision    recall  f1-score   support
+
+       Legit       0.95      0.95      0.95      2052
+       Fraud       0.95      0.94      0.95      1928
+
+    accuracy                           0.95      3980
+   macro avg       0.95      0.95      0.95      3980
+weighted avg       0.95      0.95      0.95      3980
+
+Confusion Matrix:
+[[1955   97]
+ [ 108 1820]]
+
+--- THRESHOLD SENSITIVITY (on test set) ---
+Threshold     Precision   Recall   F1 (Fraud)
+0.30             0.9081   0.9689       0.9375
+0.35             0.9231   0.9652       0.9437
+0.40             0.9325   0.9606       0.9463
+0.45             0.9402   0.9538       0.9470
+0.50             0.9494   0.9440       0.9467
+0.55             0.9569   0.9321       0.9443
+0.60             0.9648   0.9248       0.9444
+
+Running 5-fold stratified cross-validation (LR baseline)...
+CV Macro F1: 0.9353 ± 0.0046
+Per-fold   : [0.9378, 0.9287, 0.9404, 0.9385, 0.931]
+
+Model saved -> final_vectorizer.pkl + final_models.pkl
+
+--- SMOKE TEST ---
+Message                                                 Risk         Fraud prob
+--------------------------------------------------------------------------------
+Congratulations! Your account has been selected. Cli... FRAUD        0.9930
+Your OTP is 482910. Do not share this with anyone.      LEGIT        0.0753
+Hey, are you coming to college tomorrow?                LEGIT        0.0646
+Dear customer, verify your KYC immediately to avoid ... FRAUD        0.9851
+Your salary of Rs 45,000 has been credited to your a... SUSPICIOUS   0.6962 <- known FP
+FREE entry: Call 9876543210 to win an iPhone. Limite... FRAUD        0.9912
+Your Aadhaar KYC verification is pending. Update now... FRAUD        0.9862
+PM Awas Yojana: House allotted. Pay Rs 5000 registra... FRAUD        0.9333
+USPS: Your parcel is on hold. Confirm address at usp... FRAUD        0.9594
+
+Limitation: MONEY_AMOUNT token fires on both fraud and legit bank SMS.
+            Mention this in your project limitations section.
+
+Training pipeline completed successfully.

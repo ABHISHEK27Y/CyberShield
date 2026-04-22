@@ -2,15 +2,9 @@
 __pycache__/
 *.pyc
 *.pyo
-complaints/
-retrain.log
-pending_review.csv
-velocity_db.json
-cybershield.db
-instance/
 migrations/versions/
 .DS_Store
-*.pkl
+
 
 # Large datasets — DO NOT commit
 final_unified_dataset.csv
